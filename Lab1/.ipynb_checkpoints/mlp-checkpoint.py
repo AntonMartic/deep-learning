@@ -6,8 +6,14 @@ def activation(x, activation):
     
     #TODO: specify the different activation functions
     # 'activation' could be: 'linear', 'relu', 'sigmoid', or 'softmax'
-    if activation == '':
-        # TODO
+    if activation == 'linear':
+        return x
+    else if activation == 'relu':
+        return np.maximum(x, 0) # np.maximum(0, x)
+    else if activation == 'sigmoid':
+        return 1 / ( 1+ np.exp(-x))
+    else if activation == 'softmax':
+        return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum(axis=0)
     else:
         raise Exception("Activation function is not valid", activation) 
 
