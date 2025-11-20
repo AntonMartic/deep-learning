@@ -8,11 +8,11 @@ def activation(x, activation):
     # 'activation' could be: 'linear', 'relu', 'sigmoid', or 'softmax'
     if activation == 'linear':
         return x
-    else if activation == 'relu':
+    elif activation == 'relu':
         return np.maximum(x, 0) # np.maximum(0, x)
-    else if activation == 'sigmoid':
-        return 1 / ( 1+ np.exp(-x))
-    else if activation == 'softmax':
+    elif activation == 'sigmoid':
+        return 1 / ( 1 + np.exp(-x))
+    elif activation == 'softmax':
         return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum(axis=0)
     else:
         raise Exception("Activation function is not valid", activation) 
@@ -37,13 +37,13 @@ class MLP:
         self.activation = activation
 
         # TODO: specify the number of hidden layers based on the length of the provided lists
-        self.hidden_layers = 
+        self.hidden_layers = len(W) - 1
 
         self.W = W
         self.b = b
 
         # TODO: specify the total number of weights in the model (both weight matrices and bias vectors)
-        self.N = 0
+        self.N = sum(W1.size for W1 in W) + sum(b1.size for b1 in b)
 
         print('Number of hidden layers: ', self.hidden_layers)
         print('Number of model weights: ', self.N)
@@ -54,7 +54,7 @@ class MLP:
         x      # Input data points
     ):
         # TODO: specify a matrix for storing output values
-        y = 
+        y = np.zeros((x.shape[0], self.dataset.K))
 
         # TODO: implement the feed-forward layer operations
         # 1. Specify a loop over all the datapoints
@@ -64,9 +64,20 @@ class MLP:
         #    - add bias vector
         #    - apply activation function
         # 4. Specify the final layer, with 'softmax' activation
-        
-        return y
+        for i in range(x.shape[0]):
+            h = x[i].reshape(2, 1)
 
+            for l in range(self.hidden_layers):
+                z = self.W[l] @ h + self.b[l]
+                h = activation(z, self.activation)
+
+            z = self.W[-1] @ h + self.b[-1]
+            h = activation(z, 'softmax')
+
+            y[i, :] = h.flatten()
+  
+        return y
+    
     # Measure performance of model
     def evaluate(self):
         print('Model performance:')
@@ -74,7 +85,10 @@ class MLP:
         # TODO: formulate the training loss and accuracy of the MLP
         # Assume the mean squared error loss
         # Hint: For calculating accuracy, use np.argmax to get predicted class
-        train_loss = 
+
+        y_train = self.feedforward(self.dataset.x_train)
+        
+        train_loss = np.mean(y_train - self)
         train_acc = 
         print("\tTrain loss:     %0.4f"%train_loss)
         print("\tTrain accuracy: %0.2f"%train_acc)
