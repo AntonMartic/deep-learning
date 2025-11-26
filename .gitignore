@@ -10,5 +10,6 @@ __pycache__/
 # Virtual environments
 venv/
 .venv/
-.env/Lab2/patchcam/
+
+Lab2/patchcam/
 *.h5
