@@ -34,7 +34,7 @@ def conv2d_layer(h,     # activations from previous layer, shape = [height, widt
     
     # 2. Setup a nested loop over the number of output channels 
     #    and the number of input channels
-    for i in range(C0):
+    for i in range(CO):
         Z = 0;
         for j in range(CI):
             
@@ -44,10 +44,10 @@ def conv2d_layer(h,     # activations from previous layer, shape = [height, widt
     # 4. Flip the kernel horizontally and vertically (since
     #    We want to perform cross-correlation, not convolution.
     #    You can, e.g., look at np.flipud and np.fliplr
-            kernel = np.flipud(np.fliplr(kernel))
+            flipped_kernel = np.flipud(np.fliplr(kernel))
     # 5. Run convolution (you can, e.g., look at the convolve2d
     #    function in the scipy.signal library)
-            conv = signal.convolve2d(kernel, h[:,:,i],mode='same')
+            conv = signal.convolve2d(h[:,:,j],flipped_kernel ,mode='same')
     # 6. Sum convolutions over input channels, as described in the 
     #    equation for the convolutional layer
             Z += conv
@@ -90,14 +90,12 @@ def dense_layer(h,   # Activations from previous layer
     # You can use the code from your implementation
     # in Lab 1. Make sure that the h vector is a [Kx1] array.
 
-    h = h[0,:].reshape(len(h), 1)
+    h = h.reshape(len(h), 1)
 
     z = W @ h + b
     y = activation(z, act)
 
-    y[:, 0] = h.flatten()
-
-    return y
+    return y[:, 0]
 
     
 #---------------------------------
@@ -128,7 +126,7 @@ class CNN:
 
         # TODO: specify the total number of weights in the model
         #       (convolutional kernels, weight matrices, and bias vectors)
-        self.N = self.N = sum(W1.size for W1 in W) + sum(b1.size for b1 in b)
+        self.N = sum(W1.size for W1 in W if hasattr(W1, 'size')) + sum(b1.size for b1 in b if hasattr(b1, 'size'))
 
         print('Number of model weights: ', self.N)
 
@@ -173,13 +171,19 @@ class CNN:
         # TODO: formulate the training loss and accuracy of the CNN.
         # Assume the cross-entropy loss.
         # For the accuracy, you can use the implementation from Lab 1.
-        train_loss = 
-        train_acc = 
+        
+        yp_train = self.feedforward(self.dataset.x_train)
+        train_loss = -1 * np.mean(self.dataset.y_train_oh * np.log(yp_train))
+        train_pred_classes = np.argmax(yp_train, axis=1)
+        train_acc = np.mean(train_pred_classes == self.dataset.y_train)
         print("\tTrain loss:     %0.4f"%train_loss)
         print("\tTrain accuracy: %0.2f"%train_acc)
 
         # TODO: formulate the test loss and accuracy of the CNN
-        test_loss = 
-        test_acc = 
-        print("\tTest loss:      %0.4f"%train_loss)
+
+        yp_test = self.feedforward(self.dataset.x_test)
+        test_loss = -1* np.mean(self.dataset.y_test_oh * np.log(yp_test))
+        test_pred_classes = np.argmax(yp_test, axis=1)
+        test_acc = np.mean(test_pred_classes == self.dataset.y_test)
+        print("\tTest loss:      %0.4f"%test_loss)
         print("\tTest accuracy:  %0.2f"%test_acc)
